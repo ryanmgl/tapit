@@ -1,0 +1,1 @@
+{"rewrites":[{"source":"/staff","destination":"/staff/index.html"},{"source":"/counter/:counterId","destination":"/counter/index.html"}]}
