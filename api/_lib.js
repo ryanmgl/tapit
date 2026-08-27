@@ -1,5 +1,5 @@
 export const env=()=>({url:process.env.NEXT_PUBLIC_SUPABASE_URL,key:process.env.SUPABASE_SECRET_KEY});
-export async function db(path,options={}){const{url,key}=env();const r=await fetch(`${url}/rest/v1/${path}`,{...options,headers:{apikey:key,Authorization:`Bearer ${key}`,...(options.headers||{})}});if(!r.ok)throw Error(await r.text());return r.status===204?null:r.json()}
+export async function db(path,options={}){const{url,key}=env();const r=await fetch(`${url}/rest/v1/${path}`,{...options,headers:{apikey:key,Authorization:`Bearer ${key}`,...(options.headers||{})}});const text=await r.text();if(!r.ok)throw Error(text||`Database request failed (${r.status}).`);return text?JSON.parse(text):null}
 export async function user(req){const token=req.headers.authorization?.replace('Bearer ','');if(!token)throw Error('Sign in required.');const{url,key}=env();const r=await fetch(`${url}/auth/v1/user`,{headers:{apikey:key,Authorization:`Bearer ${token}`}});if(!r.ok)throw Error('Your session is invalid.');return r.json()}
-export async function role(req,allowed){const u=await user(req);const p=await db(`profiles?id=eq.${u.id}&select=role&limit=1`);if(!p[0]||!allowed.includes(p[0].role))throw Error('You do not have access to this area.');return u}
+export async function role(req,allowed){const u=await user(req);const p=await db(`profiles?id=eq.${u.id}&select=role&limit=1`);if(!p?.[0]||!allowed.includes(p[0].role))throw Error('You do not have access to this area.');return u}
 export const fail=(res,e)=>res.status(403).json({error:e.message||'Request denied.'});
